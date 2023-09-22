@@ -9,14 +9,24 @@ const {
   getCourseById,
   getCourses,
   editCourse,
+  registerCourse,
 } = require("../controllers/course.controller");
+const { addChapter } = require("../controllers/chapter.controller");
 
 const upload = multer({ storage: storage });
 
+// course
 router.get("/", getCourses);
 router.get("/:id", getCourseById);
 router.post("/add", upload.single("file"), addCourse);
 router.put("/edit/:id", editCourse);
 router.delete("/delete/:id", delCourse);
+router.post("/register-course", registerCourse);
+
+// chapter
+router.post("/:courseId/chapter", addChapter);
+router.get("/:courseId/:chapterId", (req, res) => {
+  res.send("éd");
+});
 
 module.exports = router;
