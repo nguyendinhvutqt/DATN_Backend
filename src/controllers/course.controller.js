@@ -17,9 +17,7 @@ const getCourses = async (req, res) => {
     }
     return res.status(200).json({ status: "OK", data: courses });
   } catch (error) {
-    return res
-      .status(404)
-      .json({ status: "ERR", messase: "Không tìm thấy khoá học" });
+    return res.status(500).json({ status: "ERR", messase: "Lỗi Server" });
   }
 };
 
@@ -42,9 +40,7 @@ const getCourseById = async (req, res) => {
 
     return res.status(200).json({ status: "OK", data: course });
   } catch (error) {
-    return res
-      .status(404)
-      .json({ status: "ERR", message: "Không tìm thấy khoá học" });
+    return res.status(500).json({ status: "ERR", messase: "Lỗi Server" });
   }
 };
 
@@ -53,21 +49,23 @@ const addCourse = async (req, res) => {
     const { title, description } = req.body;
     if (!title || !description || !req.file) {
       return res
-        .status(401)
+        .status(400)
         .json({ status: "ERR", messase: "Thông tin không được bỏ trống" });
     }
-    await Course.create({
+    const course = await Course.create({
       title,
       description,
       thumbnail: `/images/${req.file.filename}`,
     });
     return res
       .status(201)
-      .json({ status: "OK", message: "Tạo mới khoá học thành công" });
+      .json({
+        status: "OK",
+        data: course,
+        message: "Tạo mới khoá học thành công",
+      });
   } catch (error) {
-    return res
-      .status(401)
-      .json({ status: "ERR", message: "Tạo mới khoá học thất bại" });
+    return res.status(500).json({ status: "ERR", messase: "Lỗi Server" });
   }
 };
 
@@ -83,16 +81,14 @@ const editCourse = async (req, res) => {
     );
     if (!course) {
       return res
-        .status(401)
+        .status(400)
         .json({ status: "ERR", message: "Sửa khoá học thất bại" });
     }
     return res
       .status(200)
       .json({ status: "OK", data: course, message: "Sửa khoá học thành công" });
   } catch (error) {
-    return res
-      .status(401)
-      .json({ status: "ERR", message: "Sửa khoá học thất bại" });
+    return res.status(500).json({ status: "ERR", messase: "Lỗi Server" });
   }
 };
 
@@ -109,9 +105,7 @@ const delCourse = async (req, res) => {
       .status(200)
       .json({ status: "OK", message: "Xoá khoá học thành công" });
   } catch (error) {
-    return res
-      .status(401)
-      .json({ status: "ERR", message: "Xoá khoá học thất bại" });
+    return res.status(500).json({ status: "ERR", messase: "Lỗi Server" });
   }
 };
 
@@ -150,8 +144,7 @@ const registerCourse = async (req, res) => {
       .status(200)
       .json({ status: "OK", message: "Đăng kí khoá học thành công" });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ status: "ERR", message: "Lỗi server" });
+    return res.status(500).json({ status: "ERR", messase: "Lỗi Server" });
   }
 };
 
