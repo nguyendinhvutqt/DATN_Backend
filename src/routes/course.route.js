@@ -10,6 +10,7 @@ const {
   getCourses,
   editCourse,
   registerCourse,
+  getCoursesAndPaginate,
 } = require("../controllers/course.controller");
 const { addChapter } = require("../controllers/chapter.controller");
 
@@ -17,9 +18,10 @@ const upload = multer({ storage: storage });
 
 // course
 router.get("/", getCourses);
+router.get("/paginate", getCoursesAndPaginate);
 router.get("/:id", getCourseById);
 router.post("/add", upload.single("file"), addCourse);
-router.put("/edit/:id", editCourse);
+router.put("/edit/:id", upload.single("file"), editCourse);
 router.delete("/delete/:id", delCourse);
 router.post("/register-course", registerCourse);
 
