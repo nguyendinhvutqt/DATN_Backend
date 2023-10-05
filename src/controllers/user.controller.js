@@ -85,7 +85,6 @@ const login = async (req, res) => {
       data: { accessToken, refreshToken, user: infoUser },
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ status: "ERR", message: "Lỗi server" });
   }
 };
@@ -119,7 +118,6 @@ const getCoursesByUserId = async (req, res) => {
       data: courses,
     });
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       status: "ERR",
       message: "Lỗi server",

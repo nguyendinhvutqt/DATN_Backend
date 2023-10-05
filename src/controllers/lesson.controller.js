@@ -50,11 +50,15 @@ const addLesson = async (req, res) => {
 
     await chapter.save();
 
-    return res
-      .status(201)
-      .json({ ststus: "OK", message: "tạo bài học thành công" });
+    return res.status(201).json({
+      status: "OK",
+      data: newLesson,
+      message: "tạo bài học thành công",
+    });
   } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "lỗi server" });
+    return res
+      .status(500)
+      .json({ status: "ERR", message: "lỗi server: ", error });
   }
 };
 
@@ -89,8 +93,70 @@ const learnedLession = async (req, res) => {
   }
 };
 
+const editLesson = async (req, res) => {
+  try {
+    const { lessonId } = req.params;
+    const { title, content, resources } = req.body;
+
+    if (!lessonId) {
+      return res
+        .status(404)
+        .json({ status: "ERR", message: "Bài học không tồn tại" });
+    }
+
+    const lesson = await Lesson.findOne({ _id: lessonId });
+    if (!lesson) {
+      return res
+        .status(404)
+        .json({ status: "ERR", message: "Bài học không tồn tại" });
+    }
+
+    if (title) {
+      lesson.title = title;
+    }
+
+    if (content) {
+      lesson.content = content;
+    }
+
+    if (resources) {
+      lesson.resources = resources;
+    }
+
+    await lesson.save();
+
+    return res
+      .status(200)
+      .json({ status: "OK", data: lesson, message: "Sửa bài học thành công" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: "ERR", message: "Lỗi server: ", error });
+  }
+};
+const deleteLesson = async (req, res) => {
+  try {
+    const { lessonId } = req.params;
+    if (!lessonId) {
+      return res
+        .status(404)
+        .json({ status: "ERR", message: "Bài học không tồn tại" });
+    }
+    await Lesson.findByIdAndDelete({ _id: lessonId });
+    return res
+      .status(200)
+      .json({ status: "OK", message: "Xoá bài học thành công" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: "ERR", message: "Lỗi server: ", error });
+  }
+};
+
 module.exports = {
   getById,
   addLesson,
   learnedLession,
+  deleteLesson,
+  editLesson,
 };

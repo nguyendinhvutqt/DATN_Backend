@@ -1,13 +1,23 @@
 const express = require("express");
-const bodyParser = require("body-parser");
+const app = express();
 const cors = require("cors");
+
+const http = require("http");
+const { Server } = require("socket.io");
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000", // Thêm tên miền của ứng dụng React vào đây
+    methods: ["GET", "POST"],
+  },
+});
+
+const bodyParser = require("body-parser");
 const path = require("path");
 require("dotenv").config();
 
 const routes = require("./routes");
 const connectMongoose = require("./configs/mongoose");
-
-const app = express();
 
 const port = 3001;
 
@@ -25,8 +35,16 @@ routes(app);
 
 connectMongoose(process.env.MONGOOSE_URL);
 
-app.get("/", (req, res) => {
-  res.send("hello");
+// Định nghĩa sự kiện kết nối Socket.io
+io.on("connection", (socket) => {
+  console.log("socket Id: ", socket.id);
+
+  socket.on("comment", (data) => {
+    console.log("socket data: ", data);
+    // socket.to(data.room).emit("receive_message", data);
+  });
 });
 
-app.listen(port, () => console.log("Server is running on localhost:", port));
+server.listen(port, () => {
+  console.log("Server is running on localhost:", port);
+});

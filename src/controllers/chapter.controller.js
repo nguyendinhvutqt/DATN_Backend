@@ -28,9 +28,11 @@ const addChapter = async (req, res) => {
     course.chapters.push(newChapter._id);
     await course.save();
 
-    return res
-      .status(201)
-      .json({ status: "OK", message: "Tạo mới chương thành công" });
+    return res.status(201).json({
+      status: "OK",
+      data: newChapter,
+      message: "Tạo mới chương thành công",
+    });
   } catch (error) {
     return res
       .status(500)
@@ -58,7 +60,34 @@ const deleteChapter = async (req, res) => {
   }
 };
 
+const editChapter = async (req, res) => {
+  try {
+    const { chapterId } = req.params;
+    const { title } = req.body;
+    const chapter = await Chapter.findOne({ _id: chapterId })
+      .populate("lessons")
+      .exec();
+    if (!chapter) {
+      return res
+        .status(404)
+        .json({ status: "ERR", message: "Chương không tồn tại" });
+    }
+    if (title) {
+      chapter.title = title;
+    }
+    await chapter.save();
+    return res
+      .status(200)
+      .json({ status: "OK", data: chapter, message: "Sửa chương thành công" });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ status: "ERR", message: "Lỗi server: ", error });
+  }
+};
+
 module.exports = {
   addChapter,
   deleteChapter,
+  editChapter,
 };
