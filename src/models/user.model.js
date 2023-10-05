@@ -7,11 +7,6 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true, // Đảm bảo không có hai người dùng nào có cùng tên đăng nhập
     },
-    email: {
-      type: String,
-      required: true,
-      unique: true, // Đảm bảo không có hai người dùng nào có cùng địa chỉ email
-    },
     password: {
       type: String,
       required: true,

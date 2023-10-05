@@ -18,6 +18,7 @@ require("dotenv").config();
 
 const routes = require("./routes");
 const connectMongoose = require("./configs/mongoose");
+const handleCommentSocket = require("./socket/commentSocket");
 
 const port = 3001;
 
@@ -33,17 +34,9 @@ app.use(cors());
 
 routes(app);
 
-connectMongoose(process.env.MONGOOSE_URL);
+connectMongoose(process.env.MONGOOSE_URL1);
 
-// Định nghĩa sự kiện kết nối Socket.io
-io.on("connection", (socket) => {
-  console.log("socket Id: ", socket.id);
-
-  socket.on("comment", (data) => {
-    console.log("socket data: ", data);
-    // socket.to(data.room).emit("receive_message", data);
-  });
-});
+handleCommentSocket(io);
 
 server.listen(port, () => {
   console.log("Server is running on localhost:", port);

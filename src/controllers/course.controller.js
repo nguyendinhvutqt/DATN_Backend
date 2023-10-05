@@ -26,7 +26,9 @@ const getCoursesAndPaginate = async (req, res) => {
       data: courses,
     });
   } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "Lỗi Server: " + error });
+    return res
+      .status(500)
+      .json({ status: "ERR", message: "Lỗi Server: " + error });
   }
 };
 
@@ -153,6 +155,7 @@ const delCourse = async (req, res) => {
 const registerCourse = async (req, res) => {
   try {
     const { courseId, userId } = req.body;
+    console.log(req.body);
 
     const course = await Course.findById(courseId);
     const user = await User.findById(userId);
@@ -164,6 +167,8 @@ const registerCourse = async (req, res) => {
         message: "Không tìm thấy khoá học hoặc người dùng",
       });
     }
+
+    console.log("user: ", user);
 
     // Kiểm tra xem người dùng đã đăng kí khoá học này chưa
     if (user.enrolledCourses.includes(courseId)) {
@@ -184,6 +189,7 @@ const registerCourse = async (req, res) => {
       .status(200)
       .json({ status: "OK", message: "Đăng kí khoá học thành công" });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ status: "ERR", message: "Lỗi Server" });
   }
 };
