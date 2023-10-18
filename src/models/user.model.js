@@ -20,11 +20,13 @@ const UserSchema = new mongoose.Schema(
       type: String,
       default: "/images/avatar-default.png",
     },
-    role: {
-      type: String,
-      enum: ["user", "admin"],
-      default: "user",
-    },
+    roles: [
+      {
+        type: String,
+        enum: ["user", "admin"],
+        default: "user",
+      },
+    ],
     refreshToken: {
       type: String,
     },

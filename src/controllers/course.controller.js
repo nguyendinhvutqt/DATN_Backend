@@ -1,196 +1,78 @@
+const { StatusCodes } = require("http-status-codes");
 const Course = require("../models/course.model");
 const User = require("../models/user.model");
+const courseService = require("../services/courseService");
 
-const getCoursesAndPaginate = async (req, res) => {
+const getCoursesAndPaginate = async (req, res, next) => {
   try {
-    const { page = 1, limit = 5 } = req.query;
-    const skip = (page - 1) * limit;
-    const totalCourse = await Course.count();
-    const totalPage = Math.ceil(totalCourse / limit);
-
-    const courses = await Course.find()
-      .sort({ createdAt: "desc" })
-      .limit(limit)
-      .skip(skip);
-
-    if (!courses) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Không tìm thấy khoá học" });
-    }
-
-    return res.status(200).json({
-      status: "OK",
-      currentPage: +page,
-      totalPage: totalPage,
-      data: courses,
-    });
+    const courses = await courseService.getCoursesAndPaginate(req.params);
+    return res.status(StatusCodes.OK).json(courses);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: "ERR", message: "Lỗi Server: " + error });
+    next(error);
   }
 };
 
-const getCourses = async (req, res) => {
+const getCourses = async (req, res, next) => {
+  console.log("req.user: ", req.user);
   try {
-    const courses = await Course.find()
-      .sort({ createdAt: "desc" })
-      .populate({
-        path: "chapters",
-        populate: {
-          path: "lessons",
-          model: "Lesson",
-        },
-      });
-    if (!courses) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Không tìm thấy khoá học" });
-    }
+    const courses = await courseService.getCourses();
 
-    return res.status(200).json({
-      status: "OK",
-      data: courses,
-    });
+    return res.status(StatusCodes.OK).json(courses);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: "ERR", message: "Lỗi Server:" + error });
+    next(error);
   }
 };
 
-const getCourseById = async (req, res) => {
+const getCourseById = async (req, res, next) => {
   try {
-    const id = req.params.id;
-    const course = await Course.findOne({ _id: id }).populate({
-      path: "chapters",
-      populate: {
-        path: "lessons",
-        model: "Lesson",
-      },
-    });
+    const course = await courseService.getCourseById(req.params.courseId);
 
-    if (!course) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Không tìm thấy khoá học" });
-    }
+    return res.status(StatusCodes.OK).json(course);
+  } catch (error) {
+    next(error);
+  }
+};
 
-    return res.status(200).json({ status: "OK", data: course });
+const addCourse = async (req, res, next) => {
+  try {
+    const newCourse = await courseService.createCourse(req.body, req.file);
+    return res.status(StatusCodes.CREATED).json(newCourse);
   } catch (error) {
     return res.status(500).json({ status: "ERR", message: "Lỗi Server" });
   }
 };
 
-const addCourse = async (req, res) => {
+const editCourse = async (req, res, next) => {
   try {
-    const { title, description } = req.body;
-    if (!title || !description || !req.file) {
-      return res
-        .status(400)
-        .json({ status: "ERR", message: "Thông tin không được bỏ trống" });
-    }
-    const course = await Course.create({
-      title,
-      description,
-      thumbnail: `/images/${req.file.filename}`,
-    });
-    return res.status(201).json({
-      status: "OK",
-      data: course,
-      message: "Tạo mới khoá học thành công",
-    });
+    const editCourse = await courseService.editCourse(
+      req.params.courseId,
+      req.body,
+      req.file
+    );
+
+    return res.status(StatusCodes.OK).json(editCourse);
   } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "Lỗi Server" });
+    next(error);
   }
 };
 
-const editCourse = async (req, res) => {
+const delCourse = async (req, res, next) => {
   try {
-    const id = req.params.id;
-    const course = await Course.findOne({ _id: id });
-    if (!course) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Không tìm thấy khoá học" });
-    }
-    if (req.body.title) {
-      course.title = req.body.title;
-    }
-    if (req.body.description) {
-      course.description = req.body.description;
-    }
-    if (req.file) {
-      course.thumbnail = `/images/${req.file.filename}`;
-    }
-
-    await course.save();
-    return res
-      .status(200)
-      .json({ status: "OK", data: course, message: "Sửa khoá học thành công" });
+    const delCourse = await courseService.deleteCourse(req.params.courseId);
+    return res.status(StatusCodes.OK).json(delCourse);
   } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "Lỗi Server" });
-  }
-};
-
-const delCourse = async (req, res) => {
-  try {
-    const id = req.params.id;
-    if (!id) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Không tìm thấy khoá học" });
-    }
-    await Course.findByIdAndDelete(id);
-    return res
-      .status(200)
-      .json({ status: "OK", message: "Xoá khoá học thành công" });
-  } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "Lỗi Server" });
+    next(error);
   }
 };
 
 // Đăng kí khoá học
-const registerCourse = async (req, res) => {
+const registerCourse = async (req, res, next) => {
   try {
-    const { courseId, userId } = req.body;
-    console.log(req.body);
+    const result = await courseService.registerCourse(req.body);
 
-    const course = await Course.findById(courseId);
-    const user = await User.findById(userId);
-
-    // Kiểm tra xem khoá học và người dùng có tồn tại không
-    if (!course || !user) {
-      return res.status(404).json({
-        status: "ERR",
-        message: "Không tìm thấy khoá học hoặc người dùng",
-      });
-    }
-
-    console.log("user: ", user);
-
-    // Kiểm tra xem người dùng đã đăng kí khoá học này chưa
-    if (user.enrolledCourses.includes(courseId)) {
-      return res
-        .status(400)
-        .json({ status: "ERR", message: "Người dùng đã đăng kí khoá học này" });
-    }
-
-    // Thêm khoá học vào danh sách khoá học của người dùng
-    user.enrolledCourses.push(courseId);
-    await user.save();
-
-    // Thêm người dùng vào danh sách học viên của khoá học
-    course.students.push(userId);
-    await course.save();
-
-    return res
-      .status(200)
-      .json({ status: "OK", message: "Đăng kí khoá học thành công" });
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ status: "ERR", message: "Lỗi Server" });
+    next(error);
   }
 };
 

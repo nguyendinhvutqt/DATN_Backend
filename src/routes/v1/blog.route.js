@@ -5,7 +5,7 @@ const {
   getBlogById,
   confirmBlog,
   delBlog,
-} = require("../controllers/blog.controller");
+} = require("../../controllers/blog.controller");
 const router = express.Router();
 
 router.get("/", getBlogs);

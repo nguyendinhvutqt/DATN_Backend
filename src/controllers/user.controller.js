@@ -1,14 +1,16 @@
+const { StatusCodes } = require("http-status-codes");
+
 const User = require("../models/user.model");
 const Course = require("../models/course.model");
 const bcrypt = require("bcrypt");
 const {
   generalAccessToken,
   generalRefreshToken,
-} = require("../middlewares/auth");
+} = require("../services/jwtService");
+const userService = require("../services/userService");
 
 const register = async (req, res) => {
   try {
-    console.log("body: ", req.body);
     const { username, password, confirmPassword, name } = req.body;
     if (!username || !password || !confirmPassword || !name) {
       return res
@@ -70,7 +72,7 @@ const login = async (req, res) => {
     const infoUser = {
       userId: user._id,
       name: user.name,
-      role: user.role,
+      roles: user.roles,
       avatar: user.avatar,
     };
 
@@ -126,8 +128,19 @@ const getCoursesByUserId = async (req, res) => {
   }
 };
 
+const refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.body;
+    const result = await userService.refreshToken(refreshToken);
+    return res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   login,
   register,
   getCoursesByUserId,
+  refreshToken,
 };

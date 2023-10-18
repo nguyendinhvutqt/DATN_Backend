@@ -4,7 +4,7 @@ const {
   learnedLession,
   deleteLesson,
   editLesson,
-} = require("../controllers/lesson.controller");
+} = require("../../controllers/lesson.controller");
 const router = express.Router();
 
 router.get("/:id", getById);

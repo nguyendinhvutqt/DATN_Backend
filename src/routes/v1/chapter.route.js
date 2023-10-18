@@ -1,9 +1,9 @@
 const express = require("express");
-const { addLesson } = require("../controllers/lesson.controller");
+const { addLesson } = require("../../controllers/lesson.controller");
 const {
   deleteChapter,
   editChapter,
-} = require("../controllers/chapter.controller");
+} = require("../../controllers/chapter.controller");
 const router = express.Router();
 
 router.post("/:chapterId/lesson", addLesson);

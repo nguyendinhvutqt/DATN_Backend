@@ -16,9 +16,10 @@ const bodyParser = require("body-parser");
 const path = require("path");
 require("dotenv").config();
 
-const routes = require("./routes");
+const API_v1 = require("./routes/v1");
 const connectMongoose = require("./configs/mongoose");
 const handleCommentSocket = require("./socket/commentSocket");
+const handleErrorMiddleware = require("./middlewares/handleErrorMiddleware");
 
 const port = 3001;
 
@@ -32,7 +33,9 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-routes(app);
+app.use("/api/v1", API_v1);
+
+app.use(handleErrorMiddleware);
 
 connectMongoose(process.env.MONGOOSE_URL1);
 

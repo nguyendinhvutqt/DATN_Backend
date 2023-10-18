@@ -1,15 +1,13 @@
-const mongoose = require("mongoose");
+const { default: mongoose } = require("mongoose");
 
-const ReplyCommentSchema = new mongoose.Schema(
-  {
-    replyText: { type: String }, // Nội dung phản hồi
-    comment: { type: mongoose.Schema.Types.ObjectId, ref: "Comment" }, // Tham chiếu đến bình luận mà phản hồi liên quan
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Tham chiếu đến người dùng tạo phản hồi (nếu cần)
-    createdAt: { type: Date, default: Date.now() },
-  },
-  {
-    timestamps: true,
-  }
-);
+// Schema cho Phản Hồi (Reply)
+const ReplyCommentSchema = new mongoose.Schema({
+  textComment: String,
+  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  comment: { type: mongoose.Schema.Types.ObjectId, ref: "Comment" },
+  replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "ReplyComment" }],
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  createdAt: { type: Date, default: Date.now() },
+});
 
 module.exports = mongoose.model("ReplyComment", ReplyCommentSchema);

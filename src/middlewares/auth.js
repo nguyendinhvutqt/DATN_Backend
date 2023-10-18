@@ -1,33 +1,64 @@
-const jwt = require("jsonwebtoken");
+const { StatusCodes } = require("http-status-codes");
 require("dotenv").config();
 
-const generalAccessToken = async (payload) => {
-  const accessToken = jwt.sign(
-    {
-      ...payload,
-    },
-    process.env.ACCESS_TOKEN,
-    { expiresIn: "1h" },
-    { algorithm: "RS256" }
-  );
+const ApiError = require("../ultils/ApiError");
+const jwt = require("jsonwebtoken");
 
-  return accessToken;
+const ROLES = {
+  User: "user",
+  Admin: "admin",
 };
 
-const generalRefreshToken = async (payload) => {
-  const refreshToken = jwt.sign(
-    {
-      ...payload,
-    },
-    process.env.ACCESS_TOKEN,
-    { expiresIn: "7d" },
-    { algorithm: "RS256" }
-  );
+const authUserMiddleware = async (req, res, next) => {
+  const token = req?.headers?.authorization?.split(" ")[1];
+  if (!token) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ error: "Token không hợp lệ" });
+  }
+  try {
+    jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
+      if (err) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ error: "Xác thục người dùng thất bại" });
+      }
+      if (
+        !decoded.roles.includes(ROLES.User) ||
+        !decoded.roles.includes(ROLES.Admin)
+      ) {
+        return res
+          .status(StatusCodes.UNAUTHORIZED)
+          .json({ error: "Xác thục người dùng thất bại" });
+      }
+      req.user = decoded;
+      next();
+    });
+  } catch (error) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ error: "Xác thục người dùng thất bại" });
+  }
+};
 
-  return refreshToken;
+const authAdminMiddleware = async (req, res, next) => {
+  const token = req.headers.authorization.split(" ")[1];
+  try {
+    const decodedToken = await verifyToken(token);
+
+    if (!decodedToken.roles.includes("user")) {
+      throw new ApiError(
+        StatusCodes.UNAUTHORIZED,
+        "Xác thục người dùng thất bại"
+      );
+    }
+    req.user = decodedToken;
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = {
-  generalAccessToken,
-  generalRefreshToken,
+  authUserMiddleware,
 };
