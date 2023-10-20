@@ -33,8 +33,6 @@ const handleCommentSocket = (io) => {
     socket.on("comment", (data) => {
       const { room, comments } = data;
 
-      console.log("room comment: ", room);
-
       // Lưu bình luận vào cơ sở dữ liệu ở đây (sử dụng Mongoose hoặc thư viện khác)
 
       // Sau khi lưu thành công, gửi bình luận mới đến tất cả các kết nối trong phòng bài học

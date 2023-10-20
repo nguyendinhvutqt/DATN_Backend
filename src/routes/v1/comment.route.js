@@ -1,17 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getComment,
-  addComment,
   getCommentsByLessonId,
   createComment,
   likeComment,
   replyComment,
 } = require("../../controllers/comment.controller");
+const { authUserMiddleware } = require("../../middlewares/auth");
 
-router.get("/:lessonId/comment", getCommentsByLessonId);
-router.post("/:lessonId/comment", createComment);
-router.put("/:commentId/like", likeComment);
-router.put("/:commentId/reply", replyComment);
+// /api/v1/comments/:lesonId/comment
+router
+  .route("/:lessonId/comment")
+  .get(authUserMiddleware, getCommentsByLessonId)
+  .post(authUserMiddleware, createComment);
+
+// /api/v1/comments/:lesonId/like
+router.put("/:commentId/like", authUserMiddleware, likeComment);
+
+// /api/v1/comments/:lesonId/reply
+router.put("/:commentId/reply", authUserMiddleware, replyComment);
 
 module.exports = router;

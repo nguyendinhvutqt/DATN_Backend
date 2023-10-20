@@ -12,32 +12,30 @@ const {
   registerCourse,
   getCoursesAndPaginate,
 } = require("../../controllers/course.controller");
-const { addChapter } = require("../../controllers/chapter.controller");
-const courseValidation = require("../../validations/courseValidation");
-const { authUserMiddleware } = require("../../middlewares/auth");
+const {
+  authUserMiddleware,
+  authAdminMiddleware,
+} = require("../../middlewares/auth");
 
 const upload = multer({ storage: storage });
 
-// course
+// /api/v1/coueses/
 router
   .route("/")
-  .get(authUserMiddleware, getCourses)
-  .post(courseValidation.createCourse, upload.single("file"), addCourse);
+  .get(getCourses)
+  .post(authAdminMiddleware, upload.single("file"), addCourse);
 
+// /api/v1/coueses/paginate
 router.get("/paginate", getCoursesAndPaginate);
 
+// /api/v1/coueses/:courseId
 router
   .route("/:courseId")
   .get(getCourseById)
-  .put(courseValidation.editCourse, upload.single("file"), editCourse)
-  .delete(delCourse);
+  .put(authAdminMiddleware, upload.single("file"), editCourse)
+  .delete(authAdminMiddleware, delCourse);
 
-// router.post("/add", upload.single("file"), addCourse);
-// router.put("/edit/:id", upload.single("file"), editCourse);
-// router.delete("/delete/:id", delCourse);
-router.post("/register-course", registerCourse);
-
-// chapter
-router.post("/:courseId/chapter", addChapter);
+// /api/v1/coueses/register-course
+router.post("/register-course", authUserMiddleware, registerCourse);
 
 module.exports = router;

@@ -4,12 +4,22 @@ const {
   learnedLession,
   deleteLesson,
   editLesson,
+  addLesson,
 } = require("../../controllers/lesson.controller");
+const { authAdminMiddleware } = require("../../middlewares/auth");
 const router = express.Router();
 
-router.get("/:id", getById);
+// /api/v1/lessons/:chapterId/lesson
+router.route("/:chapterId/lesson").post(authAdminMiddleware, addLesson);
+
+// /api/v1/lessons/:lessonId
+router
+  .route("/:lessonId")
+  .get(getById)
+  .put(authAdminMiddleware, editLesson)
+  .delete(authAdminMiddleware, deleteLesson);
+
+// /api/v1/lessons/learned
 router.post("/learned", learnedLession);
-router.put("/:lessonId", editLesson);
-router.delete("/:lessonId", deleteLesson);
 
 module.exports = router;

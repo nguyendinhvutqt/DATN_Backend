@@ -60,6 +60,19 @@ const getCourses = async () => {
 };
 
 const createCourse = async (data, file) => {
+  const { title, description } = data;
+  if (!title || !description) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Thông tin không được để trống"
+    );
+  }
+  if (!file) {
+    throw new ApiError(
+      StatusCodes.BAD_REQUEST,
+      "Thông tin không được để trống"
+    );
+  }
   try {
     const course = await Course.create({
       title: data.title,
@@ -105,34 +118,26 @@ const deleteCourse = async (courseId) => {
   }
 };
 
-const registerCourse = async (data) => {
+const registerCourse = async (courseId, userInfo) => {
   try {
-    const course = await Course.findById(data.courseId);
-    const user = await User.findById(data.userId);
-
+    const course = await Course.findById(courseId);
+    const user = await User.findById(userInfo.userId);
     if (!course || !user) {
       throw new ApiError(
         StatusCodes.NOT_FOUND,
         "Không tìm thấy khoá học hoặc người dùng"
       );
     }
-
     // Kiểm tra xem người dùng đã đăng kí khoá học này chưa
-    if (user.enrolledCourses.includes(data.courseId)) {
-      throw new ApiError(
-        StatusCodes.BAD_REQUEST,
-        "Người dùng đã đăng kí khoá học này"
-      );
+    if (user.enrolledCourses.includes(courseId)) {
+      return { message: "Đăng kí khoá học thành công" };
     }
-
     // Thêm khoá học vào danh sách khoá học của người dùng
-    user.enrolledCourses.push(data.courseId);
+    user.enrolledCourses.push(courseId);
     await user.save();
-
     // Thêm người dùng vào danh sách học viên của khoá học
-    course.students.push(data.userId);
+    course.students.push(userInfo.userId);
     await course.save();
-
     return { message: "Đăng kí khoá học thành công" };
   } catch (error) {
     throw error;

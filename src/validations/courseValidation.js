@@ -3,7 +3,9 @@ const { StatusCodes } = require("http-status-codes");
 const ApiError = require("../ultils/ApiError");
 
 const createCourse = async (req, res, next) => {
+  console.log("req.body: ", req);
   const correntCondition = Joi.object({
+    file: Joi.any(),
     title: Joi.string().required().min(3).trim().strict().messages({
       "any.required": "Tiêu đề không được để trống",
       "string.empty": "Tiêu đề không được để trống",
@@ -20,6 +22,7 @@ const createCourse = async (req, res, next) => {
     await correntCondition.validateAsync(req.body, { abortEarly: false });
     next();
   } catch (error) {
+    console.log(error);
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, error.message));
   }
 };

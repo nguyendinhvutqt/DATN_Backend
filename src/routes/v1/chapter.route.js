@@ -1,13 +1,21 @@
 const express = require("express");
-const { addLesson } = require("../../controllers/lesson.controller");
 const {
   deleteChapter,
   editChapter,
+  addChapter,
 } = require("../../controllers/chapter.controller");
+const { authAdminMiddleware } = require("../../middlewares/auth");
 const router = express.Router();
 
-router.post("/:chapterId/lesson", addLesson);
-router.put("/:chapterId", editChapter);
-router.delete("/:chapterId", deleteChapter);
+// /api/v1/chapters/:courseId/chapter
+router.route("/:courseId/chapter").post(authAdminMiddleware, addChapter);
+
+// /api/v1/chapter/:chapterId
+router
+  .route("/:chapterId")
+  .put(authAdminMiddleware, editChapter)
+  .delete(authAdminMiddleware, deleteChapter);
+
+
 
 module.exports = router;

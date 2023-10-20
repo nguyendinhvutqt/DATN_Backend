@@ -1,155 +1,58 @@
 const Lesson = require("../models/lesson.model");
 const Chapter = require("../models/chapter.model");
 const User = require("../models/user.model");
+const lessonService = require("../services/lessonService");
+const { StatusCodes } = require("http-status-codes");
 
-const getById = async (req, res) => {
+const getById = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    if (!id) {
-      return res
-        .status(401)
-        .json({ status: "ERR", message: "Không tìm thấy khoá học" });
-    }
-    const lesson = await Lesson.findOne({ _id: id });
-    if (!lesson) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Không tìm thấy khoá học" });
-    }
-    return res.status(200).json({ status: "OK", data: lesson });
+    const result = await lessonService.getById(req.params.lessonId);
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "lỗi server" });
+    next(error);
   }
 };
 
-const addLesson = async (req, res) => {
+const addLesson = async (req, res, next) => {
   try {
-    const { chapterId } = req.params;
-    const { title, content, resources } = req.body;
-
-    if (!title || !content || !resources) {
-      return res
-        .status(401)
-        .json({ status: "ERR", message: "Thông tin không được để trống" });
-    }
-
-    const chapter = await Chapter.findOne({ _id: chapterId });
-    if (!chapter) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Chương học không tồn tại" });
-    }
-
-    const newLesson = new Lesson({
-      ...req.body,
-    });
-
-    await newLesson.save();
-
-    chapter.lessons.push(newLesson._id);
-
-    await chapter.save();
-
-    return res.status(201).json({
-      status: "OK",
-      data: newLesson,
-      message: "tạo bài học thành công",
-    });
+    const result = await lessonService.addLesson(
+      req.params.chapterId,
+      req.body
+    );
+    return res.status(StatusCodes.CREATED).json(result);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: "ERR", message: "lỗi server: ", error });
+    next(error);
   }
 };
 
-const learnedLession = async (req, res) => {
+const learnedLession = async (req, res, next) => {
   try {
     const { userId, lessonId } = req.body;
-
-    const user = await User.findOne({ _id: userId });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Người dùng không tồn tại" });
-    }
-
-    const lesson = await Lesson.findOne({ _id: lessonId });
-    if (!lesson) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Người dùng không tồn tại" });
-    }
-
-    if (!lesson.userLearneds.includes(user._id)) {
-      lesson.userLearneds.push(user._id);
-      await lesson.save();
-    }
-
-    return res
-      .status(200)
-      .json({ status: "OK", message: "Hoàn thành bài học" });
+    const result = await lessonService.learnedLession(userId, lessonId);
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "Lỗi server" });
+    next(error);
   }
 };
 
-const editLesson = async (req, res) => {
+const editLesson = async (req, res, next) => {
   try {
-    const { lessonId } = req.params;
-    const { title, content, resources } = req.body;
-
-    if (!lessonId) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Bài học không tồn tại" });
-    }
-
-    const lesson = await Lesson.findOne({ _id: lessonId });
-    if (!lesson) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Bài học không tồn tại" });
-    }
-
-    if (title) {
-      lesson.title = title;
-    }
-
-    if (content) {
-      lesson.content = content;
-    }
-
-    if (resources) {
-      lesson.resources = resources;
-    }
-
-    await lesson.save();
-
-    return res
-      .status(200)
-      .json({ status: "OK", data: lesson, message: "Sửa bài học thành công" });
+    const result = await lessonService.editLesson(
+      req.params.lessonId,
+      req.body
+    );
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: "ERR", message: "Lỗi server: ", error });
+    next(error);
   }
 };
-const deleteLesson = async (req, res) => {
+
+const deleteLesson = async (req, res, next) => {
   try {
-    const { lessonId } = req.params;
-    if (!lessonId) {
-      return res
-        .status(404)
-        .json({ status: "ERR", message: "Bài học không tồn tại" });
-    }
-    await Lesson.findByIdAndDelete({ _id: lessonId });
-    return res
-      .status(200)
-      .json({ status: "OK", message: "Xoá bài học thành công" });
+    const result = await lessonService.deleteLesson(req.params.lessonId);
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ status: "ERR", message: "Lỗi server: ", error });
+    next(error);
   }
 };
 

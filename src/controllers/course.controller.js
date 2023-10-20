@@ -13,7 +13,6 @@ const getCoursesAndPaginate = async (req, res, next) => {
 };
 
 const getCourses = async (req, res, next) => {
-  console.log("req.user: ", req.user);
   try {
     const courses = await courseService.getCourses();
 
@@ -38,11 +37,13 @@ const addCourse = async (req, res, next) => {
     const newCourse = await courseService.createCourse(req.body, req.file);
     return res.status(StatusCodes.CREATED).json(newCourse);
   } catch (error) {
-    return res.status(500).json({ status: "ERR", message: "Lỗi Server" });
+    next(error);
   }
 };
 
 const editCourse = async (req, res, next) => {
+  console.log("req.body: ", req.body);
+  console.log("req.file: ", req.file);
   try {
     const editCourse = await courseService.editCourse(
       req.params.courseId,
@@ -68,7 +69,10 @@ const delCourse = async (req, res, next) => {
 // Đăng kí khoá học
 const registerCourse = async (req, res, next) => {
   try {
-    const result = await courseService.registerCourse(req.body);
+    const result = await courseService.registerCourse(
+      req.body.courseId,
+      req.user
+    );
 
     return res.status(StatusCodes.OK).json(result);
   } catch (error) {
