@@ -2,6 +2,16 @@ const { StatusCodes } = require("http-status-codes");
 
 const userService = require("../services/userService");
 
+// lấy danh sách người dùng
+const getUsers = async (req, res, next) => {
+  try {
+    const result = await userService.getUsers();
+    return res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // đăng kí người dùng
 const register = async (req, res, next) => {
   try {
@@ -47,6 +57,7 @@ const refreshToken = async (req, res, next) => {
 };
 
 module.exports = {
+  getUsers,
   login,
   register,
   getCoursesLearned,

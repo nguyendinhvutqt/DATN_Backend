@@ -42,8 +42,6 @@ const addCourse = async (req, res, next) => {
 };
 
 const editCourse = async (req, res, next) => {
-  console.log("req.body: ", req.body);
-  console.log("req.file: ", req.file);
   try {
     const editCourse = await courseService.editCourse(
       req.params.courseId,

@@ -1,4 +1,5 @@
-const Blog = require("../models/blog.model");
+const { StatusCodes } = require("http-status-codes");
+const blogService = require("../services/blogService");
 
 const getBlogById = async (req, res) => {
   try {
@@ -34,24 +35,12 @@ const getBlogs = async (req, res) => {
   }
 };
 
-const addBlog = async (req, res) => {
+const addBlog = async (req, res, next) => {
   try {
-    const { title, content } = req.body;
-    if (!title || !content) {
-      return res
-        .status(401)
-        .json({ status: "ERR", message: "Thông tin không được để trống" });
-    }
-    await Blog.create({
-      ...req.body,
-    });
-    return res
-      .status(201)
-      .json({ status: "OK", message: "Tạo bài viết thành công" });
+    const result = await blogService.addBlog(req.body, req.file, req.user);
+    return res.status(StatusCodes.CREATED).json(result);
   } catch (error) {
-    return res
-      .status(401)
-      .json({ status: "ERR", message: "Tạo bài viết thất bại" });
+    next(error);
   }
 };
 

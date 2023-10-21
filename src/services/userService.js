@@ -9,6 +9,18 @@ const Course = require("../models/course.model");
 const ApiError = require("../ultils/ApiError");
 const { generalAccessToken, generalRefreshToken } = require("./jwtService");
 
+const getUsers = async () => {
+  try {
+    const users = await User.find();
+    if (!users) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Danh sách rỗng");
+    }
+    return { data: users };
+  } catch (error) {
+    throw error;
+  }
+};
+
 const register = async (data) => {
   try {
     const { username, password, confirmPassword, name } = data;
@@ -149,6 +161,7 @@ const verifyToken = (token) => {
 };
 
 module.exports = {
+  getUsers,
   register,
   login,
   getCoursesLearned,
