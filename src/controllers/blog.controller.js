@@ -1,37 +1,21 @@
 const { StatusCodes } = require("http-status-codes");
 const blogService = require("../services/blogService");
 
-const getBlogById = async (req, res) => {
+const getBlogById = async (req, res, next) => {
   try {
-    const id = req.params.id;
-
-    const blog = await Blog.findOne({ _id: id });
-    if (!blog) {
-      return res
-        .status(401)
-        .json({ status: "ERR", message: "Không tìm thấy bài viết" });
-    }
-    return res.status(200).json({ status: "OK", data: blog });
+    const result = await blogService.addBlog(req.params.blogId);
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res
-      .status(401)
-      .json({ status: "ERR", message: "Không tìm thấy bài viết" });
+    next(error);
   }
 };
 
-const getBlogs = async (req, res) => {
+const getBlogs = async (req, res, next) => {
   try {
-    const blogs = await Blog.find().limit(10);
-    if (!blogs) {
-      return res
-        .status(401)
-        .json({ status: "ERR", message: "Không tìm thấy bài viết" });
-    }
-    return res.status(200).json({ status: "OK", data: blogs });
+    const result = await blogService.getBlogs(req.query);
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res
-      .status(401)
-      .json({ status: "ERR", message: "Không tìm thấy bài viết" });
+    next(error);
   }
 };
 
@@ -44,18 +28,12 @@ const addBlog = async (req, res, next) => {
   }
 };
 
-const confirmBlog = async (req, res) => {
+const confirmBlog = async (req, res, next) => {
   try {
-    const id = req.params.id;
-
-    await Blog.findByIdAndUpdate({ _id: id }, { status: true }, { new: true });
-    return res
-      .status(200)
-      .json({ status: "OK", message: "Duyệt bài viết thành công" });
+    const result = await blogService.confirmBlog(req.params.blogId);
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res
-      .status(401)
-      .json({ status: "ERR", message: "Duyệt bài viết thất bại" });
+    next(error);
   }
 };
 

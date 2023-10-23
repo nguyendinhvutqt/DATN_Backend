@@ -5,7 +5,11 @@ const BlogSchema = new mongoose.Schema(
     title: { type: String, required: true },
     content: { type: String, required: true },
     thumbnail: { type: String, required: true },
-    status: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ["Chưa duyệt", "Đã duyệt", "Đã xoá"],
+      default: "Chưa duyệt",
+    },
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

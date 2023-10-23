@@ -9,13 +9,33 @@ const Course = require("../models/course.model");
 const ApiError = require("../ultils/ApiError");
 const { generalAccessToken, generalRefreshToken } = require("./jwtService");
 
-const getUsers = async () => {
+const STATUS_USER = {
+  HOAT_DONG: "Hoạt động",
+  DA_KHOA: "Đã khoá",
+};
+
+const getUsers = async (data) => {
   try {
-    const users = await User.find();
+    const { page = 1, limit = 2 } = data;
+    const skip = (page - 1) * limit;
+
+    const totalusers = await User.count();
+
+    const totalPage = Math.floor(totalusers / limit);
+
+    const users = await User.find({ roles: { $ne: "admin" } })
+      .sort({ createdAt: "desc" })
+      .limit(limit)
+      .skip(skip);
+
     if (!users) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Danh sách rỗng");
     }
-    return { data: users };
+    return {
+      currentPage: +page,
+      totalPage: totalPage,
+      data: users,
+    };
   } catch (error) {
     throw error;
   }
@@ -65,6 +85,13 @@ const login = async (data) => {
     const user = await User.findOne({ username });
     if (!user || !bcrypt.compareSync(password, user?.password)) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Thông tin không chính xác");
+    }
+
+    if (user.status === "Đã khoá") {
+      throw new ApiError(
+        StatusCodes.BAD_REQUEST,
+        "Tài khoản của bạn đã bị khoá"
+      );
     }
 
     const infoUser = {
@@ -149,6 +176,34 @@ const refreshToken = async (refreshToken) => {
   }
 };
 
+const blockUser = async (userId) => {
+  try {
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy người dùng");
+    }
+    user.status = STATUS_USER.DA_KHOA;
+    await user.save();
+    return { data: user };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const unBlockUser = async (userId) => {
+  try {
+    const user = await User.findOne({ _id: userId });
+    if (!user) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy người dùng");
+    }
+    user.status = STATUS_USER.HOAT_DONG;
+    await user.save();
+    return { data: user };
+  } catch (error) {
+    throw error;
+  }
+};
+
 const verifyToken = (token) => {
   return new Promise((resolve, reject) => {
     jwt.verify(token, process.env.ACCESS_TOKEN, (err, decoded) => {
@@ -166,5 +221,7 @@ module.exports = {
   login,
   getCoursesLearned,
   refreshToken,
+  blockUser,
+  unBlockUser,
   verifyToken,
 };

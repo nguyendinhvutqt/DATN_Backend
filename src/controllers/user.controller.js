@@ -5,7 +5,7 @@ const userService = require("../services/userService");
 // lấy danh sách người dùng
 const getUsers = async (req, res, next) => {
   try {
-    const result = await userService.getUsers();
+    const result = await userService.getUsers(req.query);
     return res.status(StatusCodes.OK).json(result);
   } catch (error) {
     next(error);
@@ -46,6 +46,25 @@ const getCoursesLearned = async (req, res) => {
   }
 };
 
+const blockUser = async (req, res, next) => {
+  try {
+    console.log(req.body.userId);
+    const result = await userService.blockUser(req.body.userId);
+    return res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+const unBlockUser = async (req, res, next) => {
+  try {
+    console.log(req.body.userId);
+    const result = await userService.unBlockUser(req.body.userId);
+    return res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
@@ -61,5 +80,7 @@ module.exports = {
   login,
   register,
   getCoursesLearned,
+  blockUser,
+  unBlockUser,
   refreshToken,
 };

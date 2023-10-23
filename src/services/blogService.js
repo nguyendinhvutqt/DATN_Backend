@@ -3,6 +3,46 @@ const { StatusCodes } = require("http-status-codes");
 
 const Blog = require("../models/blog.model");
 
+const getBlogById = async (blogId) => {
+  try {
+    const blog = await Blog.findOne({ _id: blogId });
+    if (!blog) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy bài viết");
+    }
+    return { data: blog };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const getBlogs = async (data) => {
+  try {
+    const { page = 1, limit = 2 } = data;
+    const skip = (page - 1) * limit;
+
+    const totalBlogs = await Blog.count();
+
+    const totalPage = Math.floor(totalBlogs / limit);
+
+    const blogs = await Blog.find()
+      .sort({ status: "asc" })
+      .limit(limit)
+      .skip(skip);
+
+    if (!blogs) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy bài viết");
+    }
+
+    return {
+      currentPage: +page,
+      totalPage: totalPage,
+      data: blogs,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 const addBlog = async (data, file, userInfo) => {
   try {
     const { title, content } = data;
@@ -25,6 +65,25 @@ const addBlog = async (data, file, userInfo) => {
   }
 };
 
+const confirmBlog = async (blogId) => {
+  try {
+    const blog = await Blog.findByIdAndUpdate(
+      { _id: blogId },
+      { status: "Đã duyệt" },
+      { new: true }
+    );
+    return {
+      message: "Duyệt bài viết thành công",
+      data: blog,
+    };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
+  getBlogById,
+  getBlogs,
   addBlog,
+  confirmBlog,
 };

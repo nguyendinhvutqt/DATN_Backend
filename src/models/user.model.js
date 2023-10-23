@@ -23,9 +23,14 @@ const UserSchema = new mongoose.Schema(
       {
         type: String,
         enum: ["user", "admin"],
-        default: "user",
+        default: ["user"],
       },
     ],
+    status: {
+      type: String,
+      enum: ["Hoạt động", "Đã khoá"],
+      default: "Hoạt động",
+    },
     refreshToken: {
       type: String,
     },
