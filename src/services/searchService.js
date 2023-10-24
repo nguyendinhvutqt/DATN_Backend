@@ -23,6 +23,7 @@ const searchService = async (q, type) => {
       });
     const blogs = await Blog.find({
       title: { $regex: new RegExp(q, "i") },
+      status: "Đã duyệt",
     }).limit(take);
     return { data: { courses, blogs } };
   } catch (error) {

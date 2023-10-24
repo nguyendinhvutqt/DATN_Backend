@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 const {
   addBlog,
   getBlogs,
@@ -10,7 +11,6 @@ const {
   authUserMiddleware,
   authAdminMiddleware,
 } = require("../../middlewares/auth");
-const multer = require("multer");
 const storage = require("../../middlewares/uploadFile");
 const router = express.Router();
 

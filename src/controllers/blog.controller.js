@@ -3,7 +3,7 @@ const blogService = require("../services/blogService");
 
 const getBlogById = async (req, res, next) => {
   try {
-    const result = await blogService.addBlog(req.params.blogId);
+    const result = await blogService.getBlogById(req.params.blogId);
     return res.status(StatusCodes.OK).json(result);
   } catch (error) {
     next(error);

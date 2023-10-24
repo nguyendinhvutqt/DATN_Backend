@@ -5,7 +5,10 @@ const Blog = require("../models/blog.model");
 
 const getBlogById = async (blogId) => {
   try {
-    const blog = await Blog.findOne({ _id: blogId });
+    const blog = await Blog.findOne({ _id: blogId }).populate(
+      "author",
+      "name avatar"
+    );
     if (!blog) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy bài viết");
     }
@@ -16,28 +19,44 @@ const getBlogById = async (blogId) => {
 };
 
 const getBlogs = async (data) => {
+  const { page, limit = 2 } = data;
   try {
-    const { page = 1, limit = 2 } = data;
-    const skip = (page - 1) * limit;
+    if (!page) {
+      const blogs = await Blog.find({ status: "Đã duyệt" })
+        .populate("author", "name avatar")
+        .sort({
+          createdAt: "desc",
+        });
 
-    const totalBlogs = await Blog.count();
+      if (!blogs) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy bài viết");
+      }
 
-    const totalPage = Math.floor(totalBlogs / limit);
+      return {
+        data: blogs,
+      };
+    } else {
+      const skip = (page - 1) * limit;
 
-    const blogs = await Blog.find()
-      .sort({ status: "asc" })
-      .limit(limit)
-      .skip(skip);
+      const totalBlogs = await Blog.count();
 
-    if (!blogs) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy bài viết");
+      const totalPage = Math.floor(totalBlogs / limit);
+
+      const blogs = await Blog.find()
+        .sort({ status: "asc" })
+        .limit(limit)
+        .skip(skip);
+
+      if (!blogs) {
+        throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy bài viết");
+      }
+
+      return {
+        currentPage: +page,
+        totalPage: totalPage,
+        data: blogs,
+      };
     }
-
-    return {
-      currentPage: +page,
-      totalPage: totalPage,
-      data: blogs,
-    };
   } catch (error) {
     throw error;
   }
