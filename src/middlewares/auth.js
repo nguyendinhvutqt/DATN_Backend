@@ -24,15 +24,16 @@ const authUserMiddleware = async (req, res, next) => {
           .json({ error: "Xác thục người dùng thất bại" });
       }
       if (
-        !decoded.roles.includes(ROLES.User) ||
-        !decoded.roles.includes(ROLES.Admin)
+        decoded.roles.includes(ROLES.User) ||
+        decoded.roles.includes(ROLES.Admin)
       ) {
+        req.user = decoded;
+        next();
+      } else {
         return res
           .status(StatusCodes.UNAUTHORIZED)
           .json({ error: "Xác thục người dùng thất bại" });
       }
-      req.user = decoded;
-      next();
     });
   } catch (error) {
     return res

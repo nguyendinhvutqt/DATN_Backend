@@ -34,9 +34,11 @@ const login = async (req, res, next) => {
 };
 
 // Controller để lấy danh sách khoá học mà người dùng đã tham gia
-const getCoursesLearned = async (req, res) => {
+const getCoursesLearned = async (req, res, next) => {
   try {
     const userInfo = req.user;
+    console.log(userInfo);
+    console.log(req.user);
 
     const result = await userService.getCoursesLearned(userInfo);
 

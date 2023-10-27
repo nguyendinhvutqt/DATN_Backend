@@ -19,7 +19,7 @@ const getBlogById = async (blogId) => {
 };
 
 const getBlogs = async (data) => {
-  const { page, limit = 2 } = data;
+  const { page, limit = 5 } = data;
   try {
     if (!page) {
       const blogs = await Blog.find({ status: "Đã duyệt" })
@@ -37,10 +37,8 @@ const getBlogs = async (data) => {
       };
     } else {
       const skip = (page - 1) * limit;
-
       const totalBlogs = await Blog.count();
-
-      const totalPage = Math.floor(totalBlogs / limit);
+      const totalPage = Math.ceil(totalBlogs / limit);
 
       const blogs = await Blog.find()
         .sort({ status: "asc" })
@@ -100,9 +98,19 @@ const confirmBlog = async (blogId) => {
   }
 };
 
+const delBlog = async (blogId) => {
+  try {
+    const deleteBlog = await Blog.findByIdAndDelete(blogId);
+    return { data: deleteBlog, message: "Xoá bài viết thành công" };
+  } catch (error) {
+    throw error;
+  }
+};
+
 module.exports = {
   getBlogById,
   getBlogs,
   addBlog,
   confirmBlog,
+  delBlog,
 };

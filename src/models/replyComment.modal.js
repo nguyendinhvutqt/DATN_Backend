@@ -7,7 +7,7 @@ const ReplyCommentSchema = new mongoose.Schema({
   comment: { type: mongoose.Schema.Types.ObjectId, ref: "Comment" },
   replies: [{ type: mongoose.Schema.Types.ObjectId, ref: "ReplyComment" }],
   likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-  createdAt: { type: Date, default: Date.now() },
+  createdAt: { type: Date, default: Date.now },
 });
 
 module.exports = mongoose.model("ReplyComment", ReplyCommentSchema);

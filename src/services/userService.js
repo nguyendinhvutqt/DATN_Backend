@@ -66,6 +66,7 @@ const register = async (data) => {
       ...data,
       password: hashPassword,
     });
+    newUser.roles.push("user");
     await newUser.save();
     return { message: "Tạo tài khoản thành công" };
   } catch (error) {

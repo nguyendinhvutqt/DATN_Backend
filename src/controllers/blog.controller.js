@@ -37,19 +37,12 @@ const confirmBlog = async (req, res, next) => {
   }
 };
 
-const delBlog = async (req, res) => {
+const delBlog = async (req, res, next) => {
   try {
-    const id = req.params.id;
-
-    await Blog.findByIdAndDelete(id);
-
-    return res
-      .status(200)
-      .json({ status: "OK", message: "Xoá bài viết thành công" });
+    const result = await blogService.delBlog(req.params.blogId);
+    return res.status(StatusCodes.OK).json(result);
   } catch (error) {
-    return res
-      .status(200)
-      .json({ status: "OK", message: "Xoá bài viết thất bại" });
+    next(error);
   }
 };
 
