@@ -27,8 +27,8 @@ const addLesson = async (req, res, next) => {
 
 const learnedLession = async (req, res, next) => {
   try {
-    const { userId, lessonId } = req.body;
-    const result = await lessonService.learnedLession(userId, lessonId);
+    const user = req.user;
+    const result = await lessonService.learnedLession(user, req.body);
     return res.status(StatusCodes.OK).json(result);
   } catch (error) {
     next(error);

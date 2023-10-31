@@ -77,7 +77,6 @@ const addBlog = async (data, file, userInfo) => {
     });
     return { message: "Tạo bài viết thành công, vui lòng chờ duyệt" };
   } catch (error) {
-    console.log(error);
     throw error;
   }
 };

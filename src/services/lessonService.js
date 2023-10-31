@@ -17,9 +17,9 @@ const getById = async (lessonId) => {
 
 const addLesson = async (chapterId, data) => {
   try {
-    const { title, content, resources } = data;
+    const { title, content, resources, text } = data;
 
-    if (!title || !content || !resources) {
+    if (!title || !content || (!resources && !text)) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
         "Thông tin không được để trống"
@@ -31,10 +31,23 @@ const addLesson = async (chapterId, data) => {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Chương học không tồn tại");
     }
 
-    const newLesson = new Lesson({
-      ...data,
-    });
+    let newLesson;
 
+    if (resources.length > 0) {
+      newLesson = new Lesson({
+        title,
+        content,
+        resources,
+      });
+    }
+
+    if (text.length > 0) {
+      newLesson = new Lesson({
+        title,
+        content,
+        docs: text,
+      });
+    }
     await newLesson.save();
 
     chapter.lessons.push(newLesson._id);
@@ -91,17 +104,17 @@ const deleteLesson = async (lessonId) => {
   }
 };
 
-const learnedLession = async (userId, lessonId) => {
+const learnedLession = async (userInfo, data) => {
   try {
-    const user = await User.findOne({ _id: userId });
+    const { lessonId } = data;
+    const user = await User.findOne({ _id: userInfo.userId });
     if (!user) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Người dùng không tồn tại");
     }
 
     const lesson = await Lesson.findOne({ _id: lessonId });
     if (!lesson) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, "Người dùng không tồn tại");
-      return res;
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Bài học không tồn tại");
     }
 
     if (!lesson.userLearneds.includes(user._id)) {
@@ -111,6 +124,7 @@ const learnedLession = async (userId, lessonId) => {
 
     return { message: "Hoàn thành bài học" };
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };

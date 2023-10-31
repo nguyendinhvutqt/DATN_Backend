@@ -6,7 +6,10 @@ const {
   editLesson,
   addLesson,
 } = require("../../controllers/lesson.controller");
-const { authAdminMiddleware } = require("../../middlewares/auth");
+const {
+  authAdminMiddleware,
+  authUserMiddleware,
+} = require("../../middlewares/auth");
 const router = express.Router();
 
 // /api/v1/lessons/:chapterId/lesson
@@ -20,6 +23,6 @@ router
   .delete(authAdminMiddleware, deleteLesson);
 
 // /api/v1/lessons/learned
-router.post("/learned", learnedLession);
+router.post("/learned", authUserMiddleware, learnedLession);
 
 module.exports = router;

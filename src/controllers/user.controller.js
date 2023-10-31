@@ -37,8 +37,6 @@ const login = async (req, res, next) => {
 const getCoursesLearned = async (req, res, next) => {
   try {
     const userInfo = req.user;
-    console.log(userInfo);
-    console.log(req.user);
 
     const result = await userService.getCoursesLearned(userInfo);
 
@@ -50,7 +48,6 @@ const getCoursesLearned = async (req, res, next) => {
 
 const blockUser = async (req, res, next) => {
   try {
-    console.log(req.body.userId);
     const result = await userService.blockUser(req.body.userId);
     return res.status(StatusCodes.OK).json(result);
   } catch (error) {
@@ -59,7 +56,6 @@ const blockUser = async (req, res, next) => {
 };
 const unBlockUser = async (req, res, next) => {
   try {
-    console.log(req.body.userId);
     const result = await userService.unBlockUser(req.body.userId);
     return res.status(StatusCodes.OK).json(result);
   } catch (error) {
