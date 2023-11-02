@@ -62,7 +62,7 @@ const addLesson = async (chapterId, data) => {
 
 const editLesson = async (lessonId, data) => {
   try {
-    const { title, content, resources } = data;
+    const { title, content, resources, docs } = data;
     if (!lessonId) {
       throw new ApiError(StatusCodes.BAD_REQUEST, "Bài học không tồn tại");
     }
@@ -82,6 +82,10 @@ const editLesson = async (lessonId, data) => {
 
     if (resources) {
       lesson.resources = resources;
+    }
+
+    if (docs) {
+      lesson.docs = docs;
     }
 
     await lesson.save();
