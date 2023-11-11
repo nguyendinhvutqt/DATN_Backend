@@ -74,6 +74,57 @@ const register = async (data) => {
   }
 };
 
+const loginGoogle = async (data) => {
+  try {
+    const { googleId, name, email, imageUrl } = data;
+
+    const user = await User.findOne({ googleId });
+    if (user) {
+      console.log("login");
+      const infoUser = {
+        userId: user._id,
+        googleId: googleId,
+        name: user.name,
+        roles: user.roles,
+        avatar: user.avatar,
+      };
+
+      const accessToken = await generalAccessToken(infoUser);
+      const refreshToken = await generalRefreshToken(infoUser);
+
+      user.refreshToken = refreshToken;
+      await user.save();
+
+      return { accessToken, refreshToken, user: infoUser };
+    }
+    console.log("new login");
+    const newUser = new User({
+      ...data,
+      avatar: imageUrl,
+    });
+    newUser.roles.push("user");
+    await newUser.save();
+
+    const infoUser = {
+      userId: user._id,
+      googleId: googleId,
+      name: user.name,
+      roles: user.roles,
+      avatar: user.avatar,
+    };
+
+    const accessToken = await generalAccessToken(infoUser);
+    const refreshToken = await generalRefreshToken(infoUser);
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    return { accessToken, refreshToken, user: infoUser };
+  } catch (error) {
+    throw error;
+  }
+};
+
 const login = async (data) => {
   try {
     const { username, password } = data;
@@ -219,6 +270,7 @@ const verifyToken = (token) => {
 module.exports = {
   getUsers,
   register,
+  loginGoogle,
   login,
   getCoursesLearned,
   refreshToken,

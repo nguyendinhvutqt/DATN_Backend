@@ -23,6 +23,15 @@ const register = async (req, res, next) => {
   }
 };
 
+const loginGoogle = async (req, res, next) => {
+  try {
+    const result = await userService.loginGoogle(req.body);
+    return res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // đăng nhập người dùng
 const login = async (req, res, next) => {
   try {
@@ -75,6 +84,7 @@ const refreshToken = async (req, res, next) => {
 
 module.exports = {
   getUsers,
+  loginGoogle,
   login,
   register,
   getCoursesLearned,

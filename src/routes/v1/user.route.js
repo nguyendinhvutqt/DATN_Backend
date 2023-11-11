@@ -8,6 +8,7 @@ const {
   refreshToken,
   blockUser,
   unBlockUser,
+  loginGoogle,
 } = require("../../controllers/user.controller");
 const {
   authUserMiddleware,
@@ -19,6 +20,9 @@ router.get("/", authAdminMiddleware, getUsers);
 
 // /appi/v1/users/sign-in
 router.post("/sign-in", login);
+
+// /appi/v1/users/sign-in/google
+router.post("/sign-in/google", loginGoogle);
 
 // /appi/v1/users/register
 router.post("/sign-up", register);
