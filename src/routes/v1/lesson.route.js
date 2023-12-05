@@ -10,10 +10,16 @@ const {
   authAdminMiddleware,
   authUserMiddleware,
 } = require("../../middlewares/auth");
+const storage = require("../../middlewares/uploadFile");
+const multer = require("multer");
 const router = express.Router();
 
+const upload = multer({ storage: storage });
+
 // /api/v1/lessons/:chapterId/lesson
-router.route("/:chapterId/lesson").post(authAdminMiddleware, addLesson);
+router
+  .route("/:chapterId/lesson")
+  .post(authAdminMiddleware, upload.single("file"), addLesson);
 
 // /api/v1/lessons/:lessonId
 router

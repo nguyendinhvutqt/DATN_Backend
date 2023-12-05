@@ -80,7 +80,6 @@ const loginGoogle = async (data) => {
 
     const user = await User.findOne({ googleId });
     if (user) {
-      console.log("login");
       const infoUser = {
         userId: user._id,
         googleId: googleId,
@@ -97,7 +96,6 @@ const loginGoogle = async (data) => {
 
       return { accessToken, refreshToken, user: infoUser };
     }
-    console.log("new login");
     const newUser = new User({
       ...data,
       avatar: imageUrl,

@@ -3,6 +3,8 @@ const Chapter = require("../models/chapter.model");
 const User = require("../models/user.model");
 const ApiError = require("../ultils/ApiError");
 const { StatusCodes } = require("http-status-codes");
+const xlsx = require("xlsx");
+const fs = require("fs");
 
 const getById = async (lessonId) => {
   if (!lessonId) {
@@ -15,11 +17,11 @@ const getById = async (lessonId) => {
   return { data: lesson };
 };
 
-const addLesson = async (chapterId, data) => {
+const addLesson = async (chapterId, data, file) => {
   try {
     const { title, content, resources, text } = data;
 
-    if (!title || !content || (!resources && !text)) {
+    if (!title || !content || (!resources && !text && !file)) {
       throw new ApiError(
         StatusCodes.BAD_REQUEST,
         "Thông tin không được để trống"
@@ -48,6 +50,38 @@ const addLesson = async (chapterId, data) => {
         docs: text,
       });
     }
+
+    if (file) {
+      // Đọc nội dung của file Excel
+      const workbook = xlsx.readFile(file.path);
+      // Lấy danh sách các sheet trong workbook
+      const sheetNames = workbook.SheetNames;
+
+      sheetNames.forEach((sheetName) => {
+        // Lấy dữ liệu từ mỗi sheet
+        const sheet = workbook.Sheets[sheetName];
+        // Chuyển đổi dữ liệu từ sheet thành mảng đối tượng
+        const data = xlsx.utils.sheet_to_json(sheet);
+        const keys = Object.keys(data[0]);
+        const quizz = {
+          question: keys[0],
+          answers: {
+            a: keys[1],
+            b: keys[2],
+            c: keys[3],
+            d: keys[4],
+          },
+          answerCorrect: keys[5],
+        };
+        fs.unlinkSync(file.path);
+
+        newLesson = new Lesson({
+          title,
+          content,
+          quizz: quizz,
+        });
+      });
+    }
     await newLesson.save();
 
     chapter.lessons.push(newLesson._id);
@@ -56,6 +90,7 @@ const addLesson = async (chapterId, data) => {
 
     return { data: newLesson, message: "Thêm mới bài học thành công" };
   } catch (error) {
+    console.log(error);
     throw error;
   }
 };

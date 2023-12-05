@@ -18,7 +18,7 @@ const {
 // /api/v1/users
 router.get("/", authAdminMiddleware, getUsers);
 
-// /appi/v1/users/sign-in
+// /api/v1/users/sign-in
 router.post("/sign-in", login);
 
 // /appi/v1/users/sign-in/google

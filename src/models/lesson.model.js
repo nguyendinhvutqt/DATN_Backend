@@ -6,6 +6,16 @@ const LessonSchema = new mongoose.Schema(
     content: { type: String, required: true },
     resources: { type: String },
     docs: { type: String },
+    quizz: {
+      question: String,
+      answers: {
+        a: String,
+        b: String,
+        c: String,
+        d: String,
+      },
+      answerCorrect: String,
+    },
     userLearneds: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   },
   {

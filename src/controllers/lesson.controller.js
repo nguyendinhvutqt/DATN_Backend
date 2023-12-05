@@ -17,7 +17,8 @@ const addLesson = async (req, res, next) => {
   try {
     const result = await lessonService.addLesson(
       req.params.chapterId,
-      req.body
+      req.body,
+      req.file
     );
     return res.status(StatusCodes.CREATED).json(result);
   } catch (error) {
