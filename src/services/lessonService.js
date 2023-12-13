@@ -62,16 +62,15 @@ const addLesson = async (chapterId, data, file) => {
         const sheet = workbook.Sheets[sheetName];
         // Chuyển đổi dữ liệu từ sheet thành mảng đối tượng
         const data = xlsx.utils.sheet_to_json(sheet);
-        const keys = Object.keys(data[0]);
         const quizz = {
-          question: keys[0],
+          question: data[0].question,
           answers: {
-            a: keys[1],
-            b: keys[2],
-            c: keys[3],
-            d: keys[4],
+            a: data[0].answerA,
+            b: data[0].answerB,
+            c: data[0].answerC,
+            d: data[0].answerD,
           },
-          answerCorrect: keys[5],
+          answerCorrect: data[0].answerCorrect,
         };
         fs.unlinkSync(file.path);
 
