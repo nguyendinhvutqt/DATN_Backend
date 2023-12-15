@@ -21,6 +21,20 @@ const getCourseById = async (courseId) => {
   }
 };
 
+// lấy ra các khoá học chưa đăng kí
+const getCourseUnregistered = async (user) => {
+  try {
+    if (user) {
+      const courses = await Course.find({ students: { $ne: user.userId } });
+      return courses;
+    }
+    const courses = await Course.find();
+    return courses;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const getCoursesAndPaginate = async (data) => {
   try {
     const { page = 1, limit = 5 } = data;
@@ -60,8 +74,8 @@ const getCourses = async () => {
 };
 
 const createCourse = async (data, file) => {
-  const { title, description } = data;
-  if (!title || !description) {
+  const { title, description, price } = data;
+  if ((!title || !description, !price)) {
     throw new ApiError(
       StatusCodes.BAD_REQUEST,
       "Thông tin không được để trống"
@@ -73,10 +87,14 @@ const createCourse = async (data, file) => {
       "Thông tin không được để trống"
     );
   }
+  if (price < 0) {
+    throw new ApiError(StatusCodes.BAD_REQUEST, "Giá khoá học không hợp lệ");
+  }
   try {
     const course = await Course.create({
       title: data.title,
       description: data.description,
+      price: price,
       thumbnail: `/images/${file.filename}`,
     });
     return { message: "Tạo mới khoá học thành công", data: course };
@@ -118,7 +136,7 @@ const deleteCourse = async (courseId) => {
   }
 };
 
-const registerCourse = async (courseId, userInfo) => {
+const paymentCourse = async (courseId, userInfo) => {
   try {
     const course = await Course.findById(courseId);
     const user = await User.findById(userInfo.userId);
@@ -130,7 +148,37 @@ const registerCourse = async (courseId, userInfo) => {
     }
     // Kiểm tra xem người dùng đã đăng kí khoá học này chưa
     if (user.enrolledCourses.includes(courseId)) {
-      return { message: "Đăng kí khoá học thành công" };
+      return { message: "Đã đăng kí khoá học này" };
+    }
+    // Thêm khoá học vào danh sách khoá học của người dùng
+    user.enrolledCourses.push(courseId);
+    await user.save();
+    // Thêm người dùng vào danh sách học viên của khoá học
+    course.students.push(userInfo.userId);
+    await course.save();
+    console.log(course);
+    return { message: "Đăng kí khoá học thành công" };
+  } catch (error) {
+    throw error;
+  }
+};
+
+const registerCourse = async (courseId, userInfo) => {
+  try {
+    const course = await Course.findById(courseId);
+    if (course.price > 0) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, "Đăng kí khoá học thất bại");
+    }
+    const user = await User.findById(userInfo.userId);
+    if (!course || !user) {
+      throw new ApiError(
+        StatusCodes.NOT_FOUND,
+        "Không tìm thấy khoá học hoặc người dùng"
+      );
+    }
+    // Kiểm tra xem người dùng đã đăng kí khoá học này chưa
+    if (user.enrolledCourses.includes(courseId)) {
+      return { message: "Đã đăng kí khoá học này" };
     }
     // Thêm khoá học vào danh sách khoá học của người dùng
     user.enrolledCourses.push(courseId);
@@ -146,10 +194,12 @@ const registerCourse = async (courseId, userInfo) => {
 
 module.exports = {
   getCourseById,
+  getCourseUnregistered,
   getCourses,
   getCoursesAndPaginate,
   createCourse,
   editCourse,
   deleteCourse,
   registerCourse,
+  paymentCourse,
 };

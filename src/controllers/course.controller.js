@@ -22,6 +22,15 @@ const getCourses = async (req, res, next) => {
   }
 };
 
+const getCourseUnregistered = async (req, res, next) => {
+  try {
+    const courses = await courseService.getCourseUnregistered(req.user);
+    return res.status(StatusCodes.OK).json(courses);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getCourseById = async (req, res, next) => {
   try {
     const course = await courseService.getCourseById(req.params.courseId);
@@ -64,6 +73,19 @@ const delCourse = async (req, res, next) => {
   }
 };
 
+const paymentCourse = async (req, res, next) => {
+  try {
+    const result = await courseService.paymentCourse(
+      req.body.courseId,
+      req.user
+    );
+
+    return res.status(StatusCodes.OK).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Đăng kí khoá học
 const registerCourse = async (req, res, next) => {
   try {
@@ -80,10 +102,12 @@ const registerCourse = async (req, res, next) => {
 
 module.exports = {
   getCoursesAndPaginate,
+  getCourseUnregistered,
   getCourses,
   getCourseById,
   addCourse,
   editCourse,
   delCourse,
   registerCourse,
+  paymentCourse,
 };
