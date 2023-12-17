@@ -1,5 +1,6 @@
 const Lesson = require("../models/lesson.model");
 const Chapter = require("../models/chapter.model");
+const Quizz = require("../models/quizz.schema");
 const User = require("../models/user.model");
 const ApiError = require("../ultils/ApiError");
 const { StatusCodes } = require("http-status-codes");
@@ -10,7 +11,7 @@ const getById = async (lessonId) => {
   if (!lessonId) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy khoá học");
   }
-  const lesson = await Lesson.findOne({ _id: lessonId });
+  const lesson = await Lesson.findOne({ _id: lessonId }).populate("quizz");
   if (!lesson) {
     throw new ApiError(StatusCodes.BAD_REQUEST, "Không tìm thấy khoá học");
   }
@@ -19,7 +20,7 @@ const getById = async (lessonId) => {
 
 const addLesson = async (chapterId, data, file) => {
   try {
-    const { title, content, resources, text } = data;
+    const { title, content, resources, text, courseId } = data;
 
     if (!title || !content || (!resources && !text && !file)) {
       throw new ApiError(
@@ -57,30 +58,39 @@ const addLesson = async (chapterId, data, file) => {
       // Lấy danh sách các sheet trong workbook
       const sheetNames = workbook.SheetNames;
 
-      sheetNames.forEach((sheetName) => {
+      sheetNames.forEach(async (sheetName) => {
         // Lấy dữ liệu từ mỗi sheet
         const sheet = workbook.Sheets[sheetName];
         // Chuyển đổi dữ liệu từ sheet thành mảng đối tượng
         const data = xlsx.utils.sheet_to_json(sheet);
-        const quizz = {
-          question: data[0].question,
-          answers: {
-            a: data[0].answerA,
-            b: data[0].answerB,
-            c: data[0].answerC,
-            d: data[0].answerD,
-          },
-          answerCorrect: data[0].answerCorrect,
-        };
-        fs.unlinkSync(file.path);
 
         newLesson = new Lesson({
-          title,
-          content,
-          quizz: quizz,
+          title: title,
+          content: content,
         });
+        let arrQuizz = [];
+        for await (const quizz of data) {
+          let answers = [];
+          answers.push(quizz.answerA);
+          answers.push(quizz.answerB);
+          answers.push(quizz.answerC);
+          answers.push(quizz.answerD);
+
+          const newQuizz = new Quizz({
+            courseId: courseId,
+            chapterId: chapterId,
+            question: quizz.question,
+            answers: answers,
+            answerCorrect: quizz.answerCorrect,
+          });
+          await newQuizz.save();
+          arrQuizz.push(newQuizz._id);
+        }
+        newLesson.quizz = arrQuizz;
+        await newLesson.save();
       });
     }
+    fs.unlinkSync(file.path);
     await newLesson.save();
 
     chapter.lessons.push(newLesson._id);
