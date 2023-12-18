@@ -88,9 +88,9 @@ const addLesson = async (chapterId, data, file) => {
         }
         newLesson.quizz = arrQuizz;
         await newLesson.save();
+        fs.unlinkSync(file.path);
       });
     }
-    fs.unlinkSync(file.path);
     await newLesson.save();
 
     chapter.lessons.push(newLesson._id);
