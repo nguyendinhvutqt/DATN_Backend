@@ -115,6 +115,9 @@ const editCourse = async (courseId, data, file) => {
     if (data.description) {
       course.description = data.description;
     }
+    if (data.price) {
+      course.price = data.price;
+    }
     if (file) {
       course.thumbnail = `/images/${file.filename}`;
     }
