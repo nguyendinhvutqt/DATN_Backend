@@ -159,7 +159,6 @@ const paymentCourse = async (courseId, userInfo) => {
     // Thêm người dùng vào danh sách học viên của khoá học
     course.students.push(userInfo.userId);
     await course.save();
-    console.log(course);
     return { message: "Đăng kí khoá học thành công" };
   } catch (error) {
     throw error;

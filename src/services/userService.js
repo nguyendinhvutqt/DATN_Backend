@@ -80,7 +80,6 @@ const loginGoogle = async (data) => {
 
     const user = await User.findOne({ googleId });
     if (user) {
-      console.log("1");
       const infoUser = {
         userId: user._id,
         googleId: googleId,
