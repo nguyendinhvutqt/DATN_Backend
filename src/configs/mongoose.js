@@ -4,7 +4,7 @@ const connectMongoose = async (urlMongoose) => {
   try {
     await mongoose.connect(urlMongoose),
       { useNewUrlParser: true, useUnifiedTopology: true };
-    console.log("Connect to mongoose success");
+    console.log("Connect to mongoose success!!");
   } catch (error) {
     console.log("Connect to mongoose fail: ", error);
   }

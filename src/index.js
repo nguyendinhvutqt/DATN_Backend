@@ -37,7 +37,7 @@ app.use("/api/v1", API_v1);
 
 app.use(handleErrorMiddleware);
 
-connectMongoose(process.env.MONGOOSE_URL1);
+connectMongoose(process.env.MONGOOSE_URL);
 
 handleCommentSocket(io);
 
